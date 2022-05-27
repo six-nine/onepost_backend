@@ -23,3 +23,7 @@ class Post(models.Model):
 
 class Attachment(models.Model):
     image = models.ImageField(upload_to='posts_images/')
+    post = models.ForeignKey(Post,
+                             on_delete=models.CASCADE,
+                             null=True,
+                             related_name="attachments")

@@ -1,6 +1,6 @@
 from rest_framework import generics
-from posts.serializers import PostSerializer
-from .models import Post
+from posts.serializers import (PostSerializer, AttachmentSerializer)
+from .models import (Post, Attachment)
 
 
 class PostsList(generics.ListCreateAPIView):
@@ -10,3 +10,12 @@ class PostsList(generics.ListCreateAPIView):
 
 class PostDetail(generics.RetrieveAPIView):
     serializer_class = PostSerializer
+
+
+class AttachmentDetail(generics.RetrieveAPIView):
+    serializer_class = AttachmentSerializer
+
+
+class AttachmentsList(generics.ListCreateAPIView):
+    serializer_class = AttachmentSerializer
+    queryset = Attachment.objects.all()
