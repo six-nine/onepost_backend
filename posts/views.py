@@ -8,8 +8,9 @@ class PostsList(generics.ListCreateAPIView):
     queryset = Post.objects.all()
 
 
-class PostDetail(generics.RetrieveAPIView):
+class PostDetail(generics.RetrieveUpdateAPIView):
     serializer_class = PostSerializer
+    queryset = Post.objects.all()
 
 
 class AttachmentDetail(generics.RetrieveAPIView):

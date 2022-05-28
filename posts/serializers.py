@@ -39,7 +39,8 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('name',
+        fields = ('id',
+                  'name',
                   'text',
                   'author',
                   'is_draft',
