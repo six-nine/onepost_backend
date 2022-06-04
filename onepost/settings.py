@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import datetime
+from os import environ
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -53,6 +55,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+SOCIAL_AUTH_VK_OAUTH2_KEY = '8179863'
+SOCIAL_AUTH_VK_OAUTH2_SECRET = '2Xu4BKvygZcZ4ilmhDH0'
+
 ROOT_URLCONF = 'onepost.urls'
 
 TEMPLATES = [
@@ -73,17 +78,46 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'onepost.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+#AUTHENTICATION_BACKENDS = [
+#	'social_core.backends.vk.VKOAuth2',
+#	'rest_framework_social_oauth2.backends.DjangoOAuth2',
+#	'django.contrib.auth.backends.ModelBackend',
+#]
+
+JWT_AUTH = {
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3600),
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'onepost',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR + '/db.sqlite3',
     }
 }
-
+#DATABASES = {
+#    'default': {
+#        'ENGINE': environ.get('POSTGRES_ENGINE', 'django.db.backends.sqlite3'),
+#        'NAME': environ.get('POSTGRES_DB', BASE_DIR + '/db.sqlite3'),
+#        'USER': environ.get('POSTGRES_USER', 'user'),
+#        'PASSWORD': environ.get('POSTGRES_PASSWORD', 'password'),
+#        'HOST': environ.get('POSTGRES_HOST', 'localhost'),
+#        'PORT': environ.get('POSTGRES_PORT', '5432'),
+#    }
+#}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -102,7 +136,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
@@ -124,3 +157,8 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+TELEGRAM = {
+    'bot_token': '5468688854:AAFOZlbAjIF-bXxv_PK4qgQDBcjPTA55LcU',
+}

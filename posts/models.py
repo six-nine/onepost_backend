@@ -10,15 +10,23 @@ class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 
+class VKAccount(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+
+
+class TelegramAccount(models.Model):
+    pass
+
+
 class Post(models.Model):
     name = models.CharField(max_length=50, null=True)
     text = models.TextField(max_length=2000)
-    author = models.ForeignKey(Blogger, default=None, on_delete=models.CASCADE)
+    author = models.ForeignKey(Blogger, default=None, null=True, on_delete=models.CASCADE)
     is_draft = models.BooleanField(default=True)
     date_created = models.DateTimeField(auto_now=True)
     tg_post = models.BooleanField(default=True)
     vk_post = models.BooleanField(default=True)
-    ok_post = models.BooleanField(default=True)
 
 
 class Attachment(models.Model):
