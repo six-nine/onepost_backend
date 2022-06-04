@@ -23,17 +23,19 @@ class PostCreate(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
+        created_post = serializer.instance
+
         if "attachments" in request.data:
             for attachment_id in request.data["attachments"]:
                 try:
                     attachment = Attachment.objects.get(id=attachment_id)
-                    attachment.post = serializer.instance
+                    attachment.post = created_post
                     attachment.save()
                 except ObjectDoesNotExist:
                     pass
 
-        tg.send_post(serializer.instance)
-        print(serializer.instance.attachments.all())
+        if not serializer.instance.is_draft:
+            tg.send_post(serializer.instance)
 
         return Response(serializer.validated_data,
                         status=status.HTTP_201_CREATED)
@@ -42,6 +44,11 @@ class PostCreate(generics.CreateAPIView):
 class PostDetail(generics.RetrieveUpdateAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
+
+
+class DraftsList(generics.ListAPIView):
+    serializer_class = PostSerializer
+    queryset = Post.objects.filter(is_draft=True)
 
 
 class AttachmentDetail(generics.RetrieveAPIView):
