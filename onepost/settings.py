@@ -55,9 +55,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-SOCIAL_AUTH_VK_OAUTH2_KEY = '8179863'
-SOCIAL_AUTH_VK_OAUTH2_SECRET = '2Xu4BKvygZcZ4ilmhDH0'
-
 ROOT_URLCONF = 'onepost.urls'
 
 TEMPLATES = [
@@ -162,3 +159,8 @@ STATIC_URL = '/static/'
 TELEGRAM = {
     'bot_token': '5468688854:AAFOZlbAjIF-bXxv_PK4qgQDBcjPTA55LcU',
 }
+
+VK_AUTHENTICATION_BASE_URL = 'https://oauth.vk.com/authorize'
+VK_APP_ID = '8179863'
+VK_APP_SECRET = '2Xu4BKvygZcZ4ilmhDH0'
+VK_REDIRECT_URL = "http://127.0.0.1:8000/api/v1/social_networks/add/vk/auth_code/"

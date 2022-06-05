@@ -8,7 +8,20 @@ class Profile(models.Model):
     user = models.OneToOneField(User,
                                 on_delete=models.CASCADE,
                                 related_name="profile")
-    telegram_chat_id = models.IntegerField(null=True)
+
+
+class TelegramInfo(models.Model):
+    chat_id = models.IntegerField(null=True)
+    profile = models.OneToOneField(Profile,
+                                   related_name="tg_info",
+                                   on_delete=models.CASCADE,
+                                   null=True)
+
+class VKInfo(models.Model):
+    profile = models.OneToOneField(Profile,
+                                   related_name="vk_info",
+                                   on_delete=models.CASCADE,
+                                   null=True)
 
 
 @receiver(post_save, sender=User)

@@ -89,3 +89,7 @@ class DraftToPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ('is_draft', )
+
+
+class VKAuthenticationLinkSerializer(serializers.Serializer):
+    link = serializers.URLField()

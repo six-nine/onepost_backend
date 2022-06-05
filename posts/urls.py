@@ -6,7 +6,9 @@ from posts.views import (PostsList,
                          AttachmentCreate,
                          DraftsList,
                          DraftToPost,
-                         ProfileDetail)
+                         ProfileDetail,
+                         VKAuthGetCode,
+                         VKGetAuthLink)
 
 
 urlpatterns = [
@@ -20,5 +22,9 @@ urlpatterns = [
     path('attachments/', AttachmentsList.as_view()),
     path('attachments/create/', AttachmentCreate.as_view()),
 
-    path('profile/', ProfileDetail.as_view())
+    path('profile/', ProfileDetail.as_view()),
+
+
+    path('social_networks/add/vk/auth_code/', VKAuthGetCode.as_view()),
+    path('social_networks/add/vk/get_link/', VKGetAuthLink.as_view()),
 ]

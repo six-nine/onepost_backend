@@ -10,14 +10,14 @@ from posts.serializers import (PostSerializer,
                                AttachmentCreateSerializer,
                                DraftToPostSerializer,
                                ProfileSerializer,
-                               UserSerializer)
+                               UserSerializer,
+                               VKAuthenticationLinkSerializer)
 from django.core.exceptions import ObjectDoesNotExist
 from .models import (Post, Attachment, Profile)
-from .social_networks_apis import tg
-
+from .social_networks_apis import tg, vk
+from django.conf import settings
 
 # TODO: permissions
-
 
 class PostsList(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -106,3 +106,49 @@ class ProfileDetail(APIView):
         serializer = ProfileSerializer(profile)
 
         return Response(serializer.data)
+
+
+class VKAuthGetCode(APIView):
+
+    def get(self, request, *args, **kwargs):
+        print(request)
+        print(args)
+        print(kwargs)
+        print(request.user.is_authenticated)
+        print(request.user.pk)
+
+        print(request.GET)
+        vk.get_access_code(request.GET.get("code"))
+
+        return Response()
+
+class VKGetAuthLink(APIView):
+
+    def post(self, request, *args, **kwargs):
+        print(request.data)
+        if "group_id" in request.data:
+            link = settings.VK_AUTHENTICATION_BASE_URL + "?";
+            group_id = request.data["group_id"]
+            params = {
+                "client_id": settings.VK_APP_ID,
+                "redirect_uri": settings.VK_REDIRECT_URL,
+                "group_ids": str(group_id),
+                "display": "page",
+                "scope": "wall",
+                "response_type": "code",
+                "v": "5.131"
+            }
+
+            for key, value in params.items():
+                link += key + "=" + value + "&"
+
+            link = link[:-1]
+            data = {"link": link}
+            serializer = VKAuthenticationLinkSerializer(data=data)
+
+            if serializer.is_valid():
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
