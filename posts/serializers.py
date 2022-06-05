@@ -9,15 +9,16 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'email']
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer
+    user = UserSerializer()
 
     class Meta:
         model = Profile
-        fields = '__all__'
+        fields = ('user',
+                  'telegram_chat_id')
 
 
 class ProfileCreateSerializer(serializers.ModelSerializer):

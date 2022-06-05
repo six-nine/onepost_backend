@@ -5,7 +5,8 @@ from posts.views import (PostsList,
                          AttachmentsList,
                          AttachmentCreate,
                          DraftsList,
-                         DraftToPost)
+                         DraftToPost,
+                         ProfileDetail)
 
 
 urlpatterns = [
@@ -18,4 +19,6 @@ urlpatterns = [
 
     path('attachments/', AttachmentsList.as_view()),
     path('attachments/create/', AttachmentCreate.as_view()),
+
+    path('profile/', ProfileDetail.as_view())
 ]

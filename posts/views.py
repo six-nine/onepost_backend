@@ -1,14 +1,22 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
 from posts.serializers import (PostSerializer,
                                PostCreateSerializer,
                                AttachmentSerializer,
                                AttachmentCreateSerializer,
-                               DraftToPostSerializer)
+                               DraftToPostSerializer,
+                               ProfileSerializer,
+                               UserSerializer)
 from django.core.exceptions import ObjectDoesNotExist
-from .models import (Post, Attachment)
+from .models import (Post, Attachment, Profile)
 from .social_networks_apis import tg
+
+
+# TODO: permissions
 
 
 class PostsList(generics.ListAPIView):
@@ -75,8 +83,6 @@ class DraftToPost(generics.UpdateAPIView):
             return super().update(request, *args, **kwargs)
 
 
-
-
 class AttachmentDetail(generics.RetrieveAPIView):
     serializer_class = AttachmentSerializer
 
@@ -88,3 +94,15 @@ class AttachmentCreate(generics.CreateAPIView):
 class AttachmentsList(generics.ListCreateAPIView):
     serializer_class = AttachmentSerializer
     queryset = Attachment.objects.all()
+
+
+class ProfileDetail(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request):
+        user = self.request.user
+        profile = user.profile
+
+        serializer = ProfileSerializer(profile)
+
+        return Response(serializer.data)
