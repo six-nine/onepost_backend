@@ -4,16 +4,18 @@ from posts.views import (PostsList,
                          PostCreate,
                          AttachmentsList,
                          AttachmentCreate,
-                         DraftsList)
+                         DraftsList,
+                         DraftToPost)
 
 
 urlpatterns = [
     path('posts/', PostsList.as_view()),
     path('posts/<int:pk>/', PostDetail.as_view()),
+    path('posts/<int:pk>/send/', DraftToPost.as_view()),
     path('posts/create/', PostCreate.as_view()),
 
     path('posts/drafts/', DraftsList.as_view()),
 
     path('attachments/', AttachmentsList.as_view()),
-    path('attachments/create/', AttachmentCreate.as_view())
+    path('attachments/create/', AttachmentCreate.as_view()),
 ]

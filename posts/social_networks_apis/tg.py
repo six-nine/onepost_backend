@@ -1,7 +1,7 @@
 from django.conf import settings
 import telegram
 
-def send_post(post, chat_id):
+def send_post(post):
     media = []
 
     attachments = post.attachments.all()

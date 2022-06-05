@@ -1,8 +1,7 @@
 from django.contrib import admin
-from .models import Blogger, Post, Attachment, Admin
+from .models import Profile, Post, Attachment
 
 
-admin.site.register(Blogger)
+admin.site.register(Profile)
 admin.site.register(Post)
 admin.site.register(Attachment)
-admin.site.register(Admin)

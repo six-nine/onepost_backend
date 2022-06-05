@@ -4,7 +4,8 @@ from rest_framework import status
 from posts.serializers import (PostSerializer,
                                PostCreateSerializer,
                                AttachmentSerializer,
-                               AttachmentCreateSerializer)
+                               AttachmentCreateSerializer,
+                               DraftToPostSerializer)
 from django.core.exceptions import ObjectDoesNotExist
 from .models import (Post, Attachment)
 from .social_networks_apis import tg
@@ -34,11 +35,13 @@ class PostCreate(generics.CreateAPIView):
                 except ObjectDoesNotExist:
                     pass
 
-        if not serializer.instance.is_draft:
-            tg.send_post(serializer.instance)
+        if not created_post.is_draft:
+            tg.send_post(created_post)
 
-        return Response(serializer.validated_data,
-                        status=status.HTTP_201_CREATED)
+        created_post.author = request.user.profile
+        created_post.save()
+
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class PostDetail(generics.RetrieveUpdateAPIView):
@@ -46,9 +49,32 @@ class PostDetail(generics.RetrieveUpdateAPIView):
     queryset = Post.objects.all()
 
 
+class PostsPostedList(generics.ListAPIView):
+    serializer_class = PostSerializer
+    queryset = Post.objects.filter(is_draft=False)
+
+
 class DraftsList(generics.ListAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.filter(is_draft=True)
+
+
+class DraftToPost(generics.UpdateAPIView):
+    serializer_class = DraftToPostSerializer
+    queryset = Post.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        post = Post.objects.get(pk=pk)
+        was_draft = post.is_draft
+        draft = request.data.get('is_draft')
+        if draft or not was_draft:
+            return super().update(request, *args, **kwargs)
+        else:
+            tg.send_post(post)
+            return super().update(request, *args, **kwargs)
+
+
 
 
 class AttachmentDetail(generics.RetrieveAPIView):

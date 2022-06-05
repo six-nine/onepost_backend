@@ -2,8 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from posts.models import (
     Post,
-    Blogger,
-    Attachment)
+    Attachment, Profile)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,18 +12,18 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'password']
 
 
-class BloggerSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer
 
     class Meta:
-        model = Blogger
+        model = Profile
         fields = '__all__'
 
 
-class BloggerCreateSerializer(serializers.ModelSerializer):
+class ProfileCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Blogger
+        model = Profile
         fields = '__all__'
 
 
@@ -59,7 +58,11 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = "__all__"
+        fields = ('name',
+                  'text',
+                  'is_draft',
+                  'tg_post',
+                  'vk_post')
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -78,3 +81,10 @@ class PostSerializer(serializers.ModelSerializer):
                   'vk_post',
                   'attachments'
                   )
+
+
+class DraftToPostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Post
+        fields = ('is_draft', )
