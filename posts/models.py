@@ -17,11 +17,13 @@ class TelegramInfo(models.Model):
                                    on_delete=models.CASCADE,
                                    null=True)
 
+
 class VKInfo(models.Model):
     profile = models.OneToOneField(Profile,
                                    related_name="vk_info",
                                    on_delete=models.CASCADE,
                                    null=True)
+    access_token = models.CharField(max_length=255, null=True)
 
 
 @receiver(post_save, sender=User)
@@ -35,18 +37,13 @@ def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
 
 
-class VKAccount(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-
-class TelegramAccount(models.Model):
-    pass
-
-
 class Post(models.Model):
     name = models.CharField(max_length=50, null=True)
     text = models.TextField(max_length=2000)
-    author = models.ForeignKey(Profile, default=None, null=True, on_delete=models.CASCADE)
+    author = models.ForeignKey(Profile,
+                               default=None,
+                               null=True,
+                               on_delete=models.CASCADE)
     is_draft = models.BooleanField(default=True)
     date_created = models.DateTimeField(auto_now=True)
     tg_post = models.BooleanField(default=True)

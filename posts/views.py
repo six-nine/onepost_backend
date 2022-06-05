@@ -13,7 +13,7 @@ from posts.serializers import (PostSerializer,
                                UserSerializer,
                                VKAuthenticationLinkSerializer)
 from django.core.exceptions import ObjectDoesNotExist
-from .models import (Post, Attachment, Profile)
+from .models import (Post, Attachment, Profile, VKInfo)
 from .social_networks_apis import tg, vk
 from django.conf import settings
 
@@ -111,21 +111,21 @@ class ProfileDetail(APIView):
 class VKAuthGetCode(APIView):
 
     def get(self, request, *args, **kwargs):
-        print(request)
-        print(args)
-        print(kwargs)
-        print(request.user.is_authenticated)
-        print(request.user.pk)
-
-        print(request.GET)
-        vk.get_access_code(request.GET.get("code"))
+        token = vk.get_access_code(request.GET.get("code"))
+        if token:
+            try:
+                request.user.profile.vk_info.access_token = token
+                request.user.profile.vk_info.save()
+            except Profile.vk_info.RelatedObjectDoesNotExist:
+                new_info = VKInfo(profile=request.user.profile,
+                                  access_token=token)
+                new_info.save()
 
         return Response()
 
 class VKGetAuthLink(APIView):
 
     def post(self, request, *args, **kwargs):
-        print(request.data)
         if "group_id" in request.data:
             link = settings.VK_AUTHENTICATION_BASE_URL + "?";
             group_id = request.data["group_id"]
