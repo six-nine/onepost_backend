@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 from posts.models import (
     Post,
     Attachment, Profile)
@@ -18,7 +19,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ('user',
-                  'telegram_chat_id')
+                  'tg_info')
 
 
 class ProfileCreateSerializer(serializers.ModelSerializer):
@@ -47,6 +48,7 @@ class AttachmentLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attachment
         fields = ('id', )
+
 
 class AttachmentCreateSerializer(serializers.ModelSerializer):
 
@@ -93,3 +95,9 @@ class DraftToPostSerializer(serializers.ModelSerializer):
 
 class VKAuthenticationLinkSerializer(serializers.Serializer):
     link = serializers.URLField()
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username", "password", "id")

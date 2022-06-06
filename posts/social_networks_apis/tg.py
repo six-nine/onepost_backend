@@ -14,7 +14,7 @@ def send_post(post):
             media.append(telegram.InputMediaPhoto(media=image))
 
     bot = telegram.Bot("5468688854:AAFOZlbAjIF-bXxv_PK4qgQDBcjPTA55LcU")
-    chat_id = -1001155201526;
+    chat_id = -1001155201527;
 
     if media:
         media[0].caption = post.text

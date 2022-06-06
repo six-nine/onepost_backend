@@ -8,7 +8,8 @@ from posts.views import (PostsList,
                          DraftToPost,
                          ProfileDetail,
                          VKAuthGetCode,
-                         VKGetAuthLink)
+                         VKGetAuthLink,
+                         Register)
 
 
 urlpatterns = [
@@ -24,7 +25,8 @@ urlpatterns = [
 
     path('profile/', ProfileDetail.as_view()),
 
-
     path('social_networks/add/vk/auth_code/', VKAuthGetCode.as_view()),
     path('social_networks/add/vk/get_link/', VKGetAuthLink.as_view()),
+
+    path('register/', Register.as_view())
 ]

@@ -1,8 +1,9 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from posts.serializers import (PostSerializer,
                                PostCreateSerializer,
@@ -11,7 +12,8 @@ from posts.serializers import (PostSerializer,
                                DraftToPostSerializer,
                                ProfileSerializer,
                                UserSerializer,
-                               VKAuthenticationLinkSerializer)
+                               VKAuthenticationLinkSerializer,
+                               RegisterSerializer)
 from django.core.exceptions import ObjectDoesNotExist
 from .models import (Post, Attachment, Profile, VKInfo)
 from .social_networks_apis import tg, vk
@@ -44,7 +46,11 @@ class PostCreate(generics.CreateAPIView):
                     pass
 
         if not created_post.is_draft:
-            tg.send_post(created_post)
+            try:
+                if created_post.tg_post:
+                    tg.send_post(created_post)
+            except Exception:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
         created_post.author = request.user.profile
         created_post.save()
@@ -152,3 +158,15 @@ class VKGetAuthLink(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class Register(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+
+    def post(self, request):
+        user = request.data
+        serializer = RegisterSerializer(data=user)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data["password"] = make_password(serializer.validated_data["password"])
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
