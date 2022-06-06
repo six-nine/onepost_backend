@@ -44,7 +44,6 @@ class Post(models.Model):
                                default=None,
                                null=True,
                                on_delete=models.CASCADE)
-    is_draft = models.BooleanField(default=True)
     date_created = models.DateTimeField(auto_now=True)
     tg_post = models.BooleanField(default=True)
     vk_post = models.BooleanField(default=True)

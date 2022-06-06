@@ -63,14 +63,12 @@ class PostCreateSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('name',
                   'text',
-                  'is_draft',
                   'tg_post',
                   'vk_post')
 
 
 class PostSerializer(serializers.ModelSerializer):
     attachments = AttachmentInPostSerializer(many=True)
-    # author = BloggerSerializer()
 
     class Meta:
         model = Post
@@ -84,13 +82,6 @@ class PostSerializer(serializers.ModelSerializer):
                   'vk_post',
                   'attachments'
                   )
-
-
-class DraftToPostSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Post
-        fields = ('is_draft', )
 
 
 class VKAuthenticationLinkSerializer(serializers.Serializer):
