@@ -1,7 +1,7 @@
 from django.conf import settings
 import telegram
 
-def send_post(post):
+def send_post(post, chat_id):
     media = []
 
     attachments = post.attachments.all()
@@ -13,8 +13,7 @@ def send_post(post):
             image = open(settings.BASE_DIR + a.image.url, "rb")
             media.append(telegram.InputMediaPhoto(media=image))
 
-    bot = telegram.Bot("5468688854:AAFOZlbAjIF-bXxv_PK4qgQDBcjPTA55LcU")
-    chat_id = -1001155201527;
+    bot = telegram.Bot(settings.TG_BOT_TOKEN)
 
     if media:
         media[0].caption = post.text

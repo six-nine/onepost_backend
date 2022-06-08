@@ -46,7 +46,6 @@ class Post(models.Model):
                                on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now=True)
     tg_post = models.BooleanField(default=True)
-    vk_post = models.BooleanField(default=True)
 
 
 class Attachment(models.Model):

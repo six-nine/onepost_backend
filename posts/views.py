@@ -12,23 +12,34 @@ from posts.serializers import (PostSerializer,
                                ProfileSerializer,
                                UserSerializer,
                                VKAuthenticationLinkSerializer,
-                               RegisterSerializer)
-from django.core.exceptions import ObjectDoesNotExist
-from .models import (Post, Attachment, Profile, VKInfo)
+                               RegisterSerializer, TelegramInfoSerializer)
+from .models import (Post, Attachment, Profile, VKInfo, TelegramInfo)
 from .social_networks_apis import tg, vk
 from django.conf import settings
-
-# TODO: permissions
+from .utils import send_post
 
 class PostsList(generics.ListAPIView):
     serializer_class = PostSerializer
-    queryset = Post.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user.profile
+        return Post.objects.filter(author=user)
 
 
 class PostCreate(generics.CreateAPIView):
     serializer_class = PostCreateSerializer
 
-    def create(self, request, *args, **kwargs):
+    def perform_create(self, serializer):
+        post = serializer.save()
+        user = self.request.user.profile
+
+        try:
+            send_post(post, user)
+            return Response(status=status.HTTP_201_CREATED)
+        except:
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+
+    def ccreate(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -41,27 +52,21 @@ class PostCreate(generics.CreateAPIView):
                     attachment = Attachment.objects.get(id=attachment_id)
                     attachment.post = created_post
                     attachment.save()
-                except ObjectDoesNotExist:
+                except:
                     pass
 
-        try:
-            if created_post.tg_post:
-                tg.send_post(created_post)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        created_post.author = request.user.profile
+        user = request.user.profile
+        created_post.author = user
         created_post.save()
 
-        return Response(status=status.HTTP_201_CREATED)
+        try:
+            send_post(created_post, user)
+            return Response(status=status.HTTP_201_CREATED)
+        except:
+            return Response(status=status.HTTP_418_IM_A_TEAPOT)
 
 
 class PostDetail(generics.RetrieveUpdateAPIView):
-    serializer_class = PostSerializer
-    queryset = Post.objects.all()
-
-
-class PostsPostedList(generics.ListAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
@@ -147,3 +152,25 @@ class Register(generics.CreateAPIView):
         serializer.validated_data["password"] = make_password(serializer.validated_data["password"])
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class TelegramInfoCreateUpdate(APIView):
+    def post(self, request):
+        has_tg = hasattr(request.user.profile, "tg_info")
+        info = None
+        if has_tg:
+            info = request.user.profile.tg_info
+        else:
+            info = TelegramInfo(profile=request.user.profile, chat_id=0)
+        serializer = TelegramInfoSerializer(data=request.data)
+        if serializer.is_valid():
+            if "chat_id" in serializer.validated_data:
+                info.chat_id = serializer.validated_data["chat_id"]
+                info.save()
+                return Response(status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+

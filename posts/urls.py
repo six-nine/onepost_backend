@@ -7,7 +7,8 @@ from posts.views import (PostsList,
                          ProfileDetail,
                          VKAuthGetCode,
                          VKGetAuthLink,
-                         Register)
+                         Register,
+                         TelegramInfoCreateUpdate)
 
 
 urlpatterns = [
@@ -22,6 +23,8 @@ urlpatterns = [
 
     path('social_networks/add/vk/auth_code/', VKAuthGetCode.as_view()),
     path('social_networks/add/vk/get_link/', VKGetAuthLink.as_view()),
+
+    path('social_networks/add/tg/', TelegramInfoCreateUpdate.as_view()),
 
     path('register/', Register.as_view())
 ]
