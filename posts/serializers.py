@@ -59,7 +59,7 @@ class AttachmentCreateSerializer(serializers.ModelSerializer):
 
 
 class PostCreateSerializer(serializers.ModelSerializer):
-    attachments = serializers.ListField(child=AttachmentCreateSerializer())
+    attachments = serializers.ListSerializer(child=AttachmentCreateSerializer())
 
     def create(self, validated_data):
         attachments = validated_data.pop('attachments')
@@ -67,8 +67,8 @@ class PostCreateSerializer(serializers.ModelSerializer):
         for attachment in attachments:
             instance = Attachment.objects.create(**attachment)
             attachments_instances.append(instance)
-        post_instance = Post.objects.create(**validated_data,
-                                            attachments=attachments_instances)
+        post_instance = Post.objects.create(**validated_data)
+        post_instance.attachments.set(attachments_instances)
         return post_instance
 
     class Meta:
@@ -77,6 +77,14 @@ class PostCreateSerializer(serializers.ModelSerializer):
                   'text',
                   'tg_post',
                   'attachments')
+
+
+class PostUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ('name',
+                  'text',
+                  'tg_post')
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -92,6 +100,13 @@ class PostSerializer(serializers.ModelSerializer):
                   'tg_post',
                   'attachments'
                   )
+
+class PostMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ('id',
+                  'name',
+                  'date_created')
 
 
 class VKAuthenticationLinkSerializer(serializers.Serializer):

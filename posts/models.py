@@ -45,7 +45,10 @@ class Post(models.Model):
                                null=True,
                                on_delete=models.CASCADE)
     date_created = models.DateTimeField(auto_now=True)
+
     tg_post = models.BooleanField(default=True)
+    tg_message_id = models.IntegerField(null=True)
+    tg_message_chat_id = models.IntegerField(null=True)
 
 
 class Attachment(models.Model):

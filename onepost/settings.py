@@ -166,3 +166,11 @@ VK_APP_SECRET = 'Nogl7Of9di4i1JImKquL'
 VK_REDIRECT_URL = "http://127.0.0.1:8000/api/social_networks/add/vk/auth_code/"
 
 TG_BOT_TOKEN = "5468688854:AAFOZlbAjIF-bXxv_PK4qgQDBcjPTA55LcU"
+
+
+# celery
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'

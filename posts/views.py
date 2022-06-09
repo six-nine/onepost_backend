@@ -7,6 +7,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from posts.serializers import (PostSerializer,
                                PostCreateSerializer,
+                               PostUpdateSerializer,
+                               PostMinimalSerializer,
                                AttachmentSerializer,
                                AttachmentCreateSerializer,
                                ProfileSerializer,
@@ -14,12 +16,13 @@ from posts.serializers import (PostSerializer,
                                VKAuthenticationLinkSerializer,
                                RegisterSerializer, TelegramInfoSerializer)
 from .models import (Post, Attachment, Profile, VKInfo, TelegramInfo)
-from .social_networks_apis import tg, vk
 from django.conf import settings
-from .utils import send_post
+from .tasks import send_post, delete_post, edit_post
+from .social_networks_apis import vk
+
 
 class PostsList(generics.ListAPIView):
-    serializer_class = PostSerializer
+    serializer_class = PostMinimalSerializer
 
     def get_queryset(self):
         user = self.request.user.profile
@@ -32,43 +35,30 @@ class PostCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         post = serializer.save()
         user = self.request.user.profile
+        post.author = user
+        post.save()
 
-        try:
-            send_post(post, user)
-            return Response(status=status.HTTP_201_CREATED)
-        except:
-            return Response(status=status.HTTP_418_IM_A_TEAPOT)
-
-    def ccreate(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-
-        created_post = serializer.instance
-
-        if "attachments" in request.data:
-            for attachment_id in request.data["attachments"]:
-                try:
-                    attachment = Attachment.objects.get(id=attachment_id)
-                    attachment.post = created_post
-                    attachment.save()
-                except:
-                    pass
-
-        user = request.user.profile
-        created_post.author = user
-        created_post.save()
-
-        try:
-            send_post(created_post, user)
-            return Response(status=status.HTTP_201_CREATED)
-        except:
-            return Response(status=status.HTTP_418_IM_A_TEAPOT)
+        send_post.delay(post.pk)
 
 
-class PostDetail(generics.RetrieveUpdateAPIView):
-    serializer_class = PostSerializer
+class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method in ('PATCH', 'UPDATE'):
+            return PostUpdateSerializer
+        else:
+            return PostSerializer
+
+    def perform_destroy(self, instance):
+        delete_post.delay(instance.tg_message_chat_id, instance.tg_message_id)
+        instance.delete()
+
+    def perform_update(self, serializer):
+        changed_post = serializer.save()
+        edit_post.delay(changed_post.tg_message_chat_id,
+                        changed_post.tg_message_id,
+                        changed_post.text)
 
 
 class AttachmentDetail(generics.RetrieveAPIView):
