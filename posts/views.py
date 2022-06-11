@@ -1,10 +1,9 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User
 from posts.serializers import (PostSerializer,
                                PostCreateSerializer,
                                PostUpdateSerializer,
@@ -12,13 +11,12 @@ from posts.serializers import (PostSerializer,
                                AttachmentSerializer,
                                AttachmentCreateSerializer,
                                ProfileSerializer,
-                               UserSerializer,
                                VKAuthenticationLinkSerializer,
                                RegisterSerializer, TelegramInfoSerializer)
 from .models import (Post, Attachment, Profile, VKInfo, TelegramInfo)
 from django.conf import settings
-from .tasks import send_post, delete_post, edit_post
-from .social_networks_apis import vk
+from .tasks import send_post_tg, delete_post_tg, edit_post_tg, send_message_vk
+from .utils import vk_get_access_code
 
 
 class PostsList(generics.ListAPIView):
@@ -38,27 +36,32 @@ class PostCreate(generics.CreateAPIView):
         post.author = user
         post.save()
 
-        send_post.delay(post.pk)
+        if post.tg_post and hasattr(user, 'tg_info'):
+            send_post_tg.delay(post.pk)
+
+        if post.vk_post and hasattr(user, 'vk_info'):
+            send_message_vk.delay(post.pk)
 
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
 
     def get_serializer_class(self):
-        if self.request.method in ('PATCH', 'UPDATE'):
+        if self.request.method == 'PATCH':
             return PostUpdateSerializer
         else:
             return PostSerializer
 
     def perform_destroy(self, instance):
-        delete_post.delay(instance.tg_message_chat_id, instance.tg_message_id)
+        delete_post_tg.delay(instance.tg_message_chat_id,
+                             instance.tg_message_id)
         instance.delete()
 
     def perform_update(self, serializer):
         changed_post = serializer.save()
-        edit_post.delay(changed_post.tg_message_chat_id,
-                        changed_post.tg_message_id,
-                        changed_post.text)
+        edit_post_tg.delay(changed_post.tg_message_chat_id,
+                           changed_post.tg_message_id,
+                           changed_post.text)
 
 
 class AttachmentDetail(generics.RetrieveAPIView):
@@ -75,7 +78,6 @@ class AttachmentsList(generics.ListCreateAPIView):
 
 
 class ProfileDetail(APIView):
-    permission_classes = [IsAuthenticated, ]
 
     def get(self, request):
         user = self.request.user
@@ -89,17 +91,14 @@ class ProfileDetail(APIView):
 class VKAuthGetCode(APIView):
 
     def get(self, request, *args, **kwargs):
-        token = vk.get_access_code(request.GET.get("code"))
+        token = vk_get_access_code(request.GET.get("code"))
         if token:
-            try:
-                request.user.profile.vk_info.access_token = token
-                request.user.profile.vk_info.save()
-            except Profile.vk_info.RelatedObjectDoesNotExist:
-                new_info = VKInfo(profile=request.user.profile,
-                                  access_token=token)
-                new_info.save()
+            info, created = VKInfo.objects.get_or_create(profile=request.user.profile)
+            info.access_token = token
+            info.save()
 
         return Response()
+
 
 class VKGetAuthLink(APIView):
 
@@ -112,7 +111,7 @@ class VKGetAuthLink(APIView):
                 "redirect_uri": settings.VK_REDIRECT_URL,
                 "group_ids": str(group_id),
                 "display": "page",
-                "scope": "wall",
+                "scope": "messages",
                 "response_type": "code",
                 "v": "5.131"
             }
@@ -134,6 +133,7 @@ class VKGetAuthLink(APIView):
 
 class Register(generics.CreateAPIView):
     serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
 
     def post(self, request):
         user = request.data
@@ -141,26 +141,23 @@ class Register(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.validated_data["password"] = make_password(serializer.validated_data["password"])
         serializer.save()
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TelegramInfoCreateUpdate(APIView):
     def post(self, request):
-        has_tg = hasattr(request.user.profile, "tg_info")
-        info = None
-        if has_tg:
-            info = request.user.profile.tg_info
-        else:
-            info = TelegramInfo(profile=request.user.profile, chat_id=0)
+
         serializer = TelegramInfoSerializer(data=request.data)
-        if serializer.is_valid():
-            if "chat_id" in serializer.validated_data:
-                info.chat_id = serializer.validated_data["chat_id"]
-                info.save()
-                return Response(status=status.HTTP_200_OK)
-            else:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-        else:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid()
+        validated_data = serializer.validated_data
 
+        if 'chat_id' not in validated_data:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
+        info, created = TelegramInfo.objects.get_or_create(
+            profile=request.user.profile)
+        info.chat_id = validated_data.get('chat_id')
+        info.save()
+
+        return Response(status=status.HTTP_201_CREATED)

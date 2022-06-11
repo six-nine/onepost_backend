@@ -1,20 +1,29 @@
-from .social_networks_apis import tg
+from django.conf import settings
+import requests
 
 
-def send_tg(post, user):
-    '''
-    Tries to send post to telegram channel
-    '''
-    has_tg = hasattr(user, "tg_info")
-    chat_id = 0
-    if has_tg:
-        chat_id = user.tg_info.chat_id
+def vk_get_access_code(auth_code):
+    if auth_code is None:
+        return None
+    url = "https://oauth.vk.com/access_token?"
+
+    params = {
+        "client_id": settings.VK_APP_ID,
+        "client_secret": settings.VK_APP_SECRET,
+        "redirect_uri": settings.VK_REDIRECT_URL,
+        "code": auth_code
+    }
+
+    for key, value in params.items():
+        url += key + "=" + value + "&"
+
+    url = url[:-1]
+
+    response = requests.get(url)
+    json = response.json()
+
+    if "groups" in json:
+        token = json["groups"][0]["access_token"]
+        return token
     else:
-        raise Exception("No Telegram info provided")
-
-    tg.send_post(post, chat_id)
-
-
-def send_post(post, user):
-    if post.tg_post:
-        send_tg(post, user)
+        return None

@@ -11,7 +11,7 @@ class Profile(models.Model):
 
 
 class TelegramInfo(models.Model):
-    chat_id = models.IntegerField(null=True)
+    chat_id = models.BigIntegerField(null=True)
     profile = models.OneToOneField(Profile,
                                    related_name="tg_info",
                                    on_delete=models.CASCADE,
@@ -47,8 +47,10 @@ class Post(models.Model):
     date_created = models.DateTimeField(auto_now=True)
 
     tg_post = models.BooleanField(default=True)
-    tg_message_id = models.IntegerField(null=True)
-    tg_message_chat_id = models.IntegerField(null=True)
+    tg_message_id = models.BigIntegerField(null=True)
+    tg_message_chat_id = models.BigIntegerField(null=True)
+
+    vk_post = models.BooleanField(default=True)
 
 
 class Attachment(models.Model):

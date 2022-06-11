@@ -1,17 +1,25 @@
-# образ на основе которого создаём контейнер
-FROM python:3.8.6
-
-# рабочая директория внутри проекта
+# pull official base image
+FROM python:3.8.3-alpine
+# set work directory
 WORKDIR /usr/src/app
-
-# переменные окружения для python
+# set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# устанавливаем зависимости
+# install psycopg2 dependencies
+RUN apk add --update --no-cache --virtual .tmp-build-deps \
+    gcc libc-dev linux-headers postgresql-dev \
+    && apk add libffi-dev
+
+# install dependencies
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-# копируем содержимое текущей папки в контейнер
+# copy entrypoint.sh
+COPY ./entrypoint.sh .
+# copy project
 COPY . .
+
+# run entrypoint.sh
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

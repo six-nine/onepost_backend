@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 import datetime
-from os import environ
+from celery import Celery
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,15 +21,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'a^s+%ddpa1lxny@zow_q^8dm!r-9&$2jzo04*^b0mhm&z4jq3#'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
+SECRET_KEY = os.environ.get("SECRET_KEY")
+DEBUG = int(os.environ.get("DEBUG", default=0))
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,7 +35,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'django_extensions',
     'posts.apps.PostsConfig',
 ]
 
@@ -77,7 +70,7 @@ WSGI_APPLICATION = 'onepost.wsgi.application'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -86,11 +79,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-#AUTHENTICATION_BACKENDS = [
-#	'social_core.backends.vk.VKOAuth2',
-#	'rest_framework_social_oauth2.backends.DjangoOAuth2',
-#	'django.contrib.auth.backends.ModelBackend',
-#]
 
 JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
@@ -99,22 +87,17 @@ JWT_AUTH = {
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR + '/db.sqlite3',
+    "default": {
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", os.path.join(BASE_DIR, "db.sqlite3")),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
-#DATABASES = {
-#    'default': {
-#        'ENGINE': environ.get('POSTGRES_ENGINE', 'django.db.backends.sqlite3'),
-#        'NAME': environ.get('POSTGRES_DB', BASE_DIR + '/db.sqlite3'),
-#        'USER': environ.get('POSTGRES_USER', 'user'),
-#        'PASSWORD': environ.get('POSTGRES_PASSWORD', 'password'),
-#        'HOST': environ.get('POSTGRES_HOST', 'localhost'),
-#        'PORT': environ.get('POSTGRES_PORT', '5432'),
-#    }
-#}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -156,21 +139,23 @@ MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 
 
-TELEGRAM = {
-    'bot_token': '5468688854:AAFOZlbAjIF-bXxv_PK4qgQDBcjPTA55LcU',
-}
-
 VK_AUTHENTICATION_BASE_URL = 'https://oauth.vk.com/authorize'
-VK_APP_ID = '8186263'
-VK_APP_SECRET = 'Nogl7Of9di4i1JImKquL'
+VK_APP_ID = '8191435'
+VK_APP_SECRET = '5rfM2p5WVh5IommkAfa6'
 VK_REDIRECT_URL = "http://127.0.0.1:8000/api/social_networks/add/vk/auth_code/"
 
 TG_BOT_TOKEN = "5468688854:AAFOZlbAjIF-bXxv_PK4qgQDBcjPTA55LcU"
 
 
 # celery
-CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "onepost.settings")
+
+app = Celery("onepost")
+app.config_from_object("django.conf:settings", namespace="CELERY")
+app.autodiscover_tasks()
+
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = "redis://redis:6379"
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'

@@ -76,6 +76,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
         fields = ('name',
                   'text',
                   'tg_post',
+                  'vk_post',
                   'attachments')
 
 
