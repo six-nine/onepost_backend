@@ -4,7 +4,8 @@ from posts.models import (
     Post,
     Attachment,
     Profile,
-    TelegramInfo)
+    TelegramInfo,
+    VKInfo)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,15 +13,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email']
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
-    class Meta:
-        model = Profile
-        fields = ('user',
-                  'tg_info')
 
 
 class ProfileCreateSerializer(serializers.ModelSerializer):
@@ -73,7 +65,8 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('name',
+        fields = ('id',
+                  'name',
                   'text',
                   'tg_post',
                   'vk_post',
@@ -102,6 +95,7 @@ class PostSerializer(serializers.ModelSerializer):
                   'attachments'
                   )
 
+
 class PostMinimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
@@ -124,3 +118,21 @@ class TelegramInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = TelegramInfo
         fields = ('chat_id', )
+
+
+class VKInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VKInfo
+        fields = ('access_token', )
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    vk_info = VKInfoSerializer()
+    tg_info = TelegramInfoSerializer()
+
+    class Meta:
+        model = Profile
+        fields = ('user',
+                  'tg_info',
+                  'vk_info')

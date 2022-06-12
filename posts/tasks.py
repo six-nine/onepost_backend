@@ -5,7 +5,7 @@ from .models import Post
 import requests
 import json
 from .constants import VK_BASE_API_URL, VK_COMMON_API_PARAMS
-
+from .utils import vk_build_url
 
 @shared_task
 def send_post_tg(post_pk):
@@ -68,20 +68,12 @@ def edit_post_tg(chat_id, message_id, new_text):
         pass
 
 
-def build_url(method):
-    return VK_BASE_API_URL + method + "?"
-
-
 def get_ids(access_token):
-    url = build_url("messages.getConversations")
 
-    params = VK_COMMON_API_PARAMS
+    params = VK_COMMON_API_PARAMS.copy()
     params["access_token"] = access_token
 
-    for param_name, param_value in params.items():
-        url += param_name + '=' + param_value + '&'
-
-    url = url[:-1]
+    url = vk_build_url("messages.getConversations", params)
 
     response = requests.get(url)
     result = json.loads(response.text)
@@ -100,6 +92,7 @@ def get_ids(access_token):
 @shared_task
 def send_message_vk(post_pk):
     post = Post.objects.get(pk=post_pk)
+
     if not post.vk_post:
         return
 
@@ -107,8 +100,7 @@ def send_message_vk(post_pk):
     text = post.text
 
     ids = get_ids(access_token)
-    url = build_url("messages.send")
-    params = VK_COMMON_API_PARAMS
+    params = VK_COMMON_API_PARAMS.copy()
     params["message"] = text
     params["random_id"] = '0'
     params["access_token"] = access_token
@@ -121,9 +113,6 @@ def send_message_vk(post_pk):
     peer_ids = peer_ids[:-1]  # erase last ','
     params["peer_ids"] = peer_ids
 
-    for param_name, param_value in params.items():
-        url += param_name + "=" + param_value + "&"
+    url = vk_build_url("messages.send", params)
 
-    response = requests.post(url)
-    print(response.text)
-
+    requests.post(url)

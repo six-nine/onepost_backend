@@ -1,5 +1,6 @@
 from django.conf import settings
 import requests
+from .constants import VK_BASE_API_URL
 
 
 def vk_get_access_code(auth_code):
@@ -27,3 +28,15 @@ def vk_get_access_code(auth_code):
         return token
     else:
         return None
+
+
+def vk_build_url(method, params):
+    url = VK_BASE_API_URL + method + "?"
+
+    for param_name, param_value in params.items():
+        url += param_name + "=" + param_value + "&"
+
+    url = url[:-1]
+
+    return url
+
