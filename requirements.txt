@@ -1,0 +1,16 @@
+celery==5.2.7
+coverage==6.4.1
+Django==3.2
+django-braces==1.15.0
+django-environ==0.8.1
+django-rest-framework-social-oauth2==1.1.0
+djangorestframework==3.13.1
+djangorestframework-simplejwt==5.2.0
+gunicorn==20.1.0
+jwcrypto==1.3.1
+Pillow==9.1.1
+psycopg2==2.8.6
+PyJWT==2.4.0
+python-telegram-bot==13.12
+redis==4.3.3
+requests==2.27.1
