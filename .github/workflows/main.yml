@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Test Django
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Repo 
@@ -17,12 +18,12 @@ jobs:
         run: |
           sudo apt-get install python3 pip
           pip3 install -r ./onepost_backend/requirements.txt
-          
+
       - name: Test
         run: python3 ./onepost_backend/manage.py test
         
   build_back:
-  
+    name: Build Backend container
     runs-on: ubuntu-latest
     
     needs: test
@@ -52,6 +53,7 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/onepost_backend:latest
     
   build_nginx:
+    name: Build nginx container
     runs-on: ubuntu-latest
     
     needs: test
