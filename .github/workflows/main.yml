@@ -76,7 +76,7 @@ jobs:
           mkdir -p ~/.ssh/
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/gcloud
           chmod 700 ~/.ssh/gcloud
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          # echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: Reload Project
         run: |
-          ssh -i ~/.ssh/gcloud ialexofficial@34.116.180.231 "sh deploy.sh"
+          ssh -i ~/.ssh/gcloud vadickozlov@104.196.231.137 "sh deploy.sh"
