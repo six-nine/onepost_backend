@@ -142,3 +142,4 @@ GitHub.sublime-settings
 *.swp
 
 /onepost_frontend/
+/onepost_backend/staticfiles/
