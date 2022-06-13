@@ -53,7 +53,7 @@ jobs:
 
       - name: Set up Docker Buildx for Backend
         id: buildx_backend
-      - uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v1
         working-directory: ./onepost_backend/
 
       - name: Build and push backend
