@@ -38,10 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     
     needs: test
-    
-    defaults:
-      run:
-        working-directory: ./onepost_backend/
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -63,7 +59,7 @@ jobs:
         id: docker_build_backend
         uses: docker/build-push-action@v2
         with:
-          context: ./
+          context: ./onepost_backend/
           file: ./Dockerfile.prod
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/onepost_backend:latest
@@ -73,12 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     
     needs: test
-    
-    defaults:
-      run:
-        working-directory: ./nginx/
 
-    
     steps:
           
       - name: Set up Docker Buildx for nginx
@@ -89,7 +80,7 @@ jobs:
         id: docker_build_nginx
         uses: docker/build-push-action@v2
         with:
-          context: ./
+          context: ./nginx/
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/onepost_nginx:latest
