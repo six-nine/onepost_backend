@@ -33,15 +33,7 @@ services:
       - ./.env.dev
     depends_on:
       - redis
-  celery-beat:
-    build: ./onepost_backend
-    command: celery -A onepost worker -l info
-    volumes:
-      - ./onepost_backend/:/usr/src/app/
-    env_file:
-      - ./.env.dev
-    depends_on:
-      - redis
+      - db
 
 volumes:
   postgres_data:

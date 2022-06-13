@@ -29,7 +29,7 @@ services:
     build: ./onepost_backend
     command: celery -A onepost worker -l info
     env_file:
-      - ./.env.dev
+      - ./.env.prod
     depends_on:
       - redis
       - web

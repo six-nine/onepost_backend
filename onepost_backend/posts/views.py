@@ -45,7 +45,7 @@ class PostCreate(generics.CreateAPIView):
 
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().prefetch_related("attachments")
 
     def get_serializer_class(self):
         if self.request.method == 'PATCH':
@@ -97,15 +97,17 @@ class VKAuthGetCode(APIView):
     permission_classes = (AllowAny, )
 
     def get(self, request, *args, **kwargs):
-        token = vk_get_access_code(request.GET.get("code"))
         id = request.GET.get("id")
+        token = vk_get_access_code(request.GET.get("code"), id)
         profile = get_object_or_404(Profile, pk=id)
         if token:
             info, created = VKInfo.objects.get_or_create(profile=profile)
             info.access_token = token
             info.save()
 
-        return Response()
+            return Response(status.HTTP_201_CREATED)
+        else:
+            return Response(status.HTTP_400_BAD_REQUEST)
 
 
 class VKGetAuthLink(APIView):
