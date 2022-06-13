@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  backend:
+  web:
     build:
       context: ./onepost_backend
       dockerfile: Dockerfile.prod
@@ -29,10 +29,10 @@ services:
     build: ./onepost_backend
     command: celery -A onepost worker -l info
     env_file:
-      - ./.env.dev
+      - ./.env.prod
     depends_on:
       - redis
-      - backend
+      - web
 
   nginx:
     build: ./nginx
@@ -41,7 +41,7 @@ services:
     volumes:
       - static_volume:/home/onepost/onepost_backend/staticfiles
     depends_on:
-      - backend
+      - web
 
 volumes:
   postgres_data:

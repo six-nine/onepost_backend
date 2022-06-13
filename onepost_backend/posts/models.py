@@ -52,6 +52,11 @@ class Post(models.Model):
 
     vk_post = models.BooleanField(default=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['author'])
+        ]
+
 
 class Attachment(models.Model):
     image = models.ImageField(upload_to='posts_images/')

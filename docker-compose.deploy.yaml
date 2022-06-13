@@ -1,6 +1,6 @@
-version: '3.7'
+version: '3'
 services:
-  backend:
+  web:
     image: sixnine/onepost_backend:latest
     command: gunicorn onepost.wsgi:application --bind 0.0.0.0:8000
     expose:
@@ -27,19 +27,19 @@ services:
     image: sixnine/onepost_backend:latest
     command: celery -A onepost worker -l info
     env_file:
-      - ./.env.dev
+      - ./.env.prod
     depends_on:
       - redis
-      - backend
+      - web
 
   nginx:
-    build: ./nginx
+    image: sixnine/onepost_nginx:latest
     ports:
       - 1337:80
     volumes:
       - static_volume:/home/onepost/onepost_backend/staticfiles
     depends_on:
-      - backend
+      - web
 
 volumes:
   postgres_data:
