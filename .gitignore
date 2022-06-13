@@ -2,6 +2,7 @@
 *.log
 *.pot
 *.pyc
+*.env*
 
 __pycache__
 db.sqlite3
@@ -139,3 +140,5 @@ GitHub.sublime-settings
 
 # Vim
 *.swp
+
+/onepost_frontend/
