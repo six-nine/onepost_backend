@@ -106,4 +106,4 @@ jobs:
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: Reload Project
         run: |
-          ssh -i ~/.ssh/gcloud vadickozlov@104.196.231.137 "docker-compose up -f docker-compose.deploy.yaml --build -d"
+          ssh -i ~/.ssh/gcloud vadickozlov@104.196.231.137 "sh deploy.sh"
