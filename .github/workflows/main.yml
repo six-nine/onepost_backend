@@ -51,9 +51,11 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Set up Docker Buildx
-        id: buildx
+      - name: Set up Docker Buildx for Backend
+        id: buildx_backend
         uses: docker/setup-buildx-action@v1
+        with:
+          context: ./onepost_backend/
 
       - name: Build and push backend
         id: docker_build_backend
@@ -63,6 +65,12 @@ jobs:
           file: ./Dockerfile.prod
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/onepost_backend:latest
+          
+      - name: Set up Docker Buildx for nginx
+        id: buildx_nginx
+        uses: docker/setup-buildx-action@v1
+        with:
+          context: ./nginx/
           
       - name: Build and push nginx
         id: docker_build_nginx
