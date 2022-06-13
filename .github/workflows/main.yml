@@ -59,13 +59,12 @@ jobs:
         id: docker_build_backend
         uses: docker/build-push-action@v2
         with:
-          context: ./
+          context: ./onepost_backend/
           file: ./onepost_backend/Dockerfile.prod
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/onepost_backend:latest
     
   build_nginx:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     
     needs: test
@@ -80,7 +79,7 @@ jobs:
         id: docker_build_nginx
         uses: docker/build-push-action@v2
         with:
-          context: ./
+          context: ./nginx/
           file: ./nginx/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/onepost_nginx:latest
