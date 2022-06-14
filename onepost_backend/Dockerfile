@@ -22,6 +22,8 @@ RUN pip install -r requirements.txt
 
 COPY ./entrypoint.prod.sh .
 RUN chmod +x  $APP_HOME/entrypoint.prod.sh
+RUN mkdir $APP_HOME/log
+RUN touch $APP_HOME/log/gunicorn.error.log
 
 COPY . $APP_HOME
 
