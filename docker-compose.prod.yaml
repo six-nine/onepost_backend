@@ -4,7 +4,7 @@ services:
     build:
       context: ./onepost_backend
       dockerfile: Dockerfile
-    command: gunicorn onepost.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn onepost.wsgi:application -c ./gunicorn.conf.py
     expose:
       - 8000
     volumes:
