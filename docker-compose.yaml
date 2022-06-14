@@ -1,7 +1,9 @@
 version: '3.7'
 services:
   web:
-    build: ./onepost_backend
+    build:
+      context: ./onepost_backend
+      dockerfile: Dockerfile.dev
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./onepost_backend/:/usr/src/app/

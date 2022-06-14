@@ -1,25 +1,32 @@
-# pull official base image
 FROM python:3.8.3-alpine
-# set work directory
-WORKDIR /usr/src/app
-# set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
 
-# install psycopg2 dependencies
+RUN mkdir -p /home/onepost
+
+RUN addgroup -S onepost && adduser -S onepost -G onepost
+
+# create the appropriate directories
+ENV HOME=/home/onepost
+ENV APP_HOME=/home/onepost/onepost_backend
+RUN mkdir $APP_HOME
+RUN mkdir $APP_HOME/staticfiles
+
+WORKDIR $APP_HOME
+
 RUN apk add --update --no-cache --virtual .tmp-build-deps \
     gcc libc-dev linux-headers postgresql-dev \
     && apk add libffi-dev
 
-# install dependencies
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-# copy entrypoint.sh
-COPY ./entrypoint.sh .
-# copy project
-COPY . .
+COPY ./entrypoint.prod.sh .
+RUN chmod +x  $APP_HOME/entrypoint.prod.sh
 
-# run entrypoint.sh
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+COPY . $APP_HOME
+
+RUN chown -R onepost:onepost $APP_HOME
+
+USER onepost
+
+ENTRYPOINT ["/home/onepost/onepost_backend/entrypoint.prod.sh"]
