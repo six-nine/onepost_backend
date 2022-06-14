@@ -3,7 +3,7 @@ services:
   web:
     build:
       context: ./onepost_backend
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     command: gunicorn onepost.wsgi:application --bind 0.0.0.0:8000
     expose:
       - 8000
@@ -36,8 +36,10 @@ services:
 
   nginx:
     build: ./nginx
+    expose:
+      - 8080
     ports:
-      - 1337:80
+      - 80:8080
     volumes:
       - static_volume:/home/onepost/onepost_backend/staticfiles
     depends_on:
