@@ -48,7 +48,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./onepost_backend/
-          file: ./onepost_backend/Dockerfile.prod
+          file: ./onepost_backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/onepost_backend:latest
     
