@@ -23,7 +23,11 @@ RUN pip install -r requirements.txt
 COPY ./entrypoint.prod.sh .
 RUN chmod +x  $APP_HOME/entrypoint.prod.sh
 RUN mkdir $APP_HOME/log
+RUN mkdir $APP_HOME/log/nginx
 RUN touch $APP_HOME/log/gunicorn.error.log
+RUN touch $APP_HOME/log/gunicorn.access.log
+RUN touch $APP_HOME/log/nginx/access.log
+RUN touch $APP_HOME/log/nginx/error.log
 
 COPY . $APP_HOME
 
